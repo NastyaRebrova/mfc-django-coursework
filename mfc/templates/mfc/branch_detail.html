@@ -1,0 +1,72 @@
+{% extends 'mfc/base.html' %}
+
+{% block title %}{{ branch.name }} - Детальная информация{% endblock %}
+
+{% block content %}
+<section>
+    <h2>{{ branch.name }}</h2>
+    
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+        <div>
+            <div class="card" style="text-align: center; margin-bottom: 15px;">
+                <h3>Фото отделения</h3>
+                {% if branch.photo %}
+                    <div class="photo-container">
+                        <img src="{{ branch.photo.url }}" 
+                             alt="{{ branch.name }}" 
+                             style="max-width: 100%; border-radius: 5px;">
+                    </div>
+                {% else %}
+                    <div style="padding: 40px; background-color: #e9ecef; border-radius: 5px;">
+                        <p>Фото отделения отсутствует</p>
+                    </div>
+                {% endif %}
+            </div>
+            
+            <div class="card">
+                <h3>Системная информация</h3>
+                <p><strong>Дата создания:</strong><br>
+                    {{ branch.created_at|date:"d.m.Y H:i" }}
+                </p>
+                <p><strong>Дата последнего обновления:</strong><br>
+                    {{ branch.updated_at|date:"d.m.Y H:i" }}
+                </p>
+            </div>
+            
+        </div>
+        
+        <div>
+            <div class="card">
+                <h3>График работы</h3>
+                <p>{{ branch.work_schedule }}</p>
+            </div>
+
+            <div class="card">
+                <h3>Контактная информация</h3>
+                <p><strong>Адрес:</strong><br>{{ branch.address }}</p>
+                <p><strong>Телефон:</strong><br>{{ branch.phone }}</p>
+                <p><strong>Email:</strong><br>{{ branch.email }}</p>
+                <p><strong>Статус:</strong> 
+                    {% if branch.is_active %}
+                        <span style="color: green; font-weight: bold;">Активно</span>
+                    {% else %}
+                        <span style="color: red;">Неактивно</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+    </div>
+    
+    <div style="margin-top: 20px; display: flex; gap: 10px;">
+        <a href="{% url 'mfc:branch_edit' branch.pk %}" class="btn btn-warning">
+            Редактировать отделение
+        </a>
+        <a href="{% url 'mfc:branch_delete' branch.pk %}" class="btn btn-danger">
+            Удалить отделение
+        </a>
+        <a href="{% url 'mfc:branch_list' %}" class="btn">
+            Вернуться к списку
+        </a>
+    </div>
+</section>
+{% endblock %}

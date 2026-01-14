@@ -1,0 +1,122 @@
+{% extends 'mfc/base.html' %}
+
+{% block title %}
+    {% if form_type == 'create' %}
+        Добавление нового отделения
+    {% else %}
+        Редактирование отделения: {{ branch.name }}
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<section>
+    {% if form_type == 'create' %}
+        <h2>Добавление нового отделения МФЦ</h2>
+        <p class="card">Заполните форму для добавления нового отделения МФЦ в систему</p>
+    {% else %}
+        <h2>Редактирование отделения: {{ branch.name }}</h2>
+        <p class="card">Измените необходимые поля и нажмите "Сохранить изменения"</p>
+    {% endif %}
+    
+    <form method="post" enctype="multipart/form-data" novalidate style="max-width: 800px; margin: 0 auto;">
+        <!-- enctype="multipart/form-data" для загрузки файлов (фото) -->
+        {% csrf_token %}
+        <div class="card">
+            <h3>Основная информация</h3>
+            
+            <div class="form-group">
+                <label for="name">Название отделения *</label>
+                <input type="text" id="name" name="name" 
+                       value="{% if form_type == 'edit' %}{{ branch.name }}{% endif %}" 
+                       placeholder="Например: МФЦ Королев №3"
+                       required>
+            </div>
+            
+            <div class="form-group">
+                <label for="address">Адрес *</label>
+                <textarea id="address" name="address" 
+                          placeholder="Полный адрес отделения"
+                          required>{% if form_type == 'edit' %}{{ branch.address }}{% endif %}</textarea>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Телефон *</label>
+                <input type="tel" id="phone" name="phone" 
+                       value="{% if form_type == 'edit' %}{{ branch.phone }}{% endif %}" 
+                       placeholder="+7-999-123-45-67"
+                       required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email адрес *</label>
+                <input type="email" id="email" name="email" 
+                       value="{% if form_type == 'edit' %}{{ branch.email }}{% endif %}" 
+                       placeholder="office@mfc-example.ru"
+                       required>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h3>Часы работы</h3>
+            
+            <div class="form-group">
+                <label for="work_schedule">График работы *</label>
+                <textarea id="work_schedule" name="work_schedule" 
+                          placeholder="Понедельник-пятница: 9:00-18:00; Суббота: 10:00-16:00; Воскресенье: выходной"
+                          required>{% if form_type == 'edit' %}{{ branch.work_schedule }}{% endif %}</textarea>
+            </div>
+            
+            {% if form_type == 'edit' %}
+            <div class="form-group">
+                <label for="is_active">
+                    <input type="checkbox" id="is_active" name="is_active" 
+                           {% if branch.is_active %}checked{% endif %}>
+                    Отделение активно
+                </label>
+            </div>
+            {% endif %}
+        </div>
+        
+        <div class="card">
+            <h3>Фото отделения</h3>
+            
+            <div class="form-group">
+                <label for="photo">Загрузить фото</label>
+                <input type="file" id="photo" name="photo" accept="image/*">
+                
+                {% if form_type == 'edit' and branch.photo %}
+                <div style="margin-top: 15px; padding: 10px; background-color: #f8f9fa; border-radius: 5px;">
+                    <p><strong>Текущее фото:</strong></p>
+                    <div class="photo-container">
+                        <img src="{{ branch.photo.url }}" 
+                             alt="{{ branch.name }}" 
+                             style="max-width: 200px; border-radius: 5px;">
+                    </div>
+                    <div style="margin-top: 10px;">
+                        <label>
+                            <input type="checkbox" name="photo-clear" value="1">
+                            Удалить текущее фото
+                        </label>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div style="margin-top: 30px; display: flex; gap: 15px; justify-content: center;">
+            <button type="submit" class="btn btn-success" style="padding: 12px 30px;">
+                {% if form_type == 'create' %}
+                    Создать отделение
+                {% else %}
+                    Сохранить изменения
+                {% endif %}
+            </button>
+            
+            <a href="{% if form_type == 'edit' %}{% url 'mfc:branch_detail' branch.pk %}{% else %}{% url 'mfc:branch_list' %}{% endif %}" 
+               class="btn" style="padding: 12px 30px;">
+                Отмена
+            </a>
+        </div>
+    </form>
+</section>
+{% endblock %}

@@ -1,0 +1,51 @@
+{% extends 'mfc/base.html' %}
+
+{% block title %}Подтверждение удаления отделения{% endblock %}
+
+{% block content %}
+<section style="max-width: 600px; margin: 20px auto;">
+    <h2 style="color: #dc3545; text-align: center;"> Подтверждение удаления</h2>
+    
+    <div class="card" style="border: 2px solid #f5c6cb; background-color: #f8d7da;">
+        <h3 style="color: #721c24; margin-top: 0;">Вы уверены, что хотите удалить это отделение?</h3>
+        
+        <div style="background-color: white; padding: 15px; border-radius: 5px; margin: 15px 0;">
+            <h4 style="margin-top: 0;">{{ branch.name }}</h4>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px;">
+                <div>
+                    <p><strong>Адрес:</strong><br>{{ branch.address|truncatechars:50 }}</p>
+                    <p><strong>Телефон:</strong><br>{{ branch.phone }}</p>
+                </div>
+                <div>
+                    <p><strong>Email:</strong><br>{{ branch.email }}</p>
+                    <p><strong>Статус:</strong><br>
+                        {% if branch.is_active %}
+                            <span style="color: green;">Активно</span>
+                        {% else %}
+                            <span style="color: red;">Неактивно</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+            
+        <form method="post">
+            {% csrf_token %}
+            
+            <div style="display: flex; justify-content: center; gap: 15px; margin-top: 20px;">
+                <button type="submit" 
+                    class="btn btn-danger" 
+                    style="padding: 12px 30px; font-weight: bold;">
+                    Да, удалить отделение
+                </button>
+                
+                <a href="{% url 'mfc:branch_detail' branch.pk %}" 
+                    class="btn" 
+                    style="padding: 12px 30px;">
+                    Нет, вернуться назад
+                </a>
+            </div>
+        </form>
+    </div>
+</section>
+{% endblock %}

@@ -1,0 +1,90 @@
+{% extends 'mfc/base.html' %}
+
+{% block title %}Список отделений МФЦ{% endblock %}
+
+{% block content %}
+
+<section>
+    <h2>Список всех отделений МФЦ</h2>
+    
+    {% if branches %}
+        <p>Найдено отделений: {{ branches|length }}</p>
+        <table>
+            <thead>
+                <tr>
+                    <th>Фото</th>
+                    <th>ID</th>
+                    <th>Название</th>
+                    <th>Адрес</th>
+                    <th>Телефон</th>
+                    <th>Статус</th>
+                    <th>Действия</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for branch in branches %}
+                <tr>
+                    <td style="text-align: center; vertical-align: middle;">
+                        {% if branch.photo %}
+                            <img src="{{ branch.photo.url }}" 
+                                 alt="{{ branch.name }}" 
+                                 style="width: 100px; height: 80px; object-fit: cover; border-radius: 3px;">
+                        {% else %}
+                            <div style="width: 100px; height: 80px; background-color: #e9ecef; 
+                                        display: flex; align-items: center; justify-content: center;
+                                        border-radius: 3px; margin: 0 auto;">
+                                <span style="color: #6c757d; font-size: 12px;">Нет фото</span>
+                            </div>
+                        {% endif %}
+                    </td>
+                    <td>{{ branch.id }}</td>
+                    <td>
+                        <div class="name_container">
+                            <strong>{{ branch.name }}</strong>
+                            <small style="color: #666;">{{ branch.email }}</small>
+                        </div>
+                    </td>
+                    <td>{{ branch.address|truncatechars:30 }}</td>
+                    <td>{{ branch.phone }}</td>
+                    <td>
+                        {% if branch.is_active %}
+                            <span style="color: green; font-weight: bold;">Активно</span>
+                        {% else %}
+                            <span style="color: red;">Неактивно</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="button-container">
+                            <a href="{% url 'mfc:branch_detail' branch.pk %}" class="btn">
+                                Просмотр
+                            </a>
+                            <a href="{% url 'mfc:branch_edit' branch.pk %}" class="btn btn-warning">
+                                Редактировать
+                            </a>
+                            <a href="{% url 'mfc:branch_delete' branch.pk %}" class="btn btn-danger">
+                                Удалить
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <div class="card" style="text-align: center; padding: 40px;">
+            <h3>Нет отделений</h3>
+            <p>В базе данных отсутствуют отделения МФЦ.</p>
+            <p>Добавьте первое отделение:</p>
+            <a href="{% url 'mfc:branch_create' %}" class="btn btn-success">
+                Добавить первое отделение
+            </a>
+        </div>
+    {% endif %}
+    
+    <div style="margin-top: 30px; text-align: center;">
+        <a href="{% url 'mfc:branch_create' %}" class="btn btn-success">
+            + Добавить новое отделение
+        </a>
+    </div>
+</section>
+{% endblock %}
