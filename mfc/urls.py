@@ -1,7 +1,11 @@
-from django.urls import path
+from django.urls import path, include
 from . import views
+from .api import BranchViewSet, ServiceViewSet
+from rest_framework.routers import DefaultRouter
 
-app_name = 'mfc'
+router = DefaultRouter()
+router.register(r'branches', BranchViewSet, basename='branch')
+router.register(r'services', ServiceViewSet, basename='service')
 
 urlpatterns = [
     # список всех отделений
@@ -18,4 +22,8 @@ urlpatterns = [
     
     # удаление отделения
     path('branches/<int:pk>/delete/', views.branch_delete, name='branch_delete'),
+
+    path('api/', include(router.urls)),
 ]
+
+app_name = 'mfc'

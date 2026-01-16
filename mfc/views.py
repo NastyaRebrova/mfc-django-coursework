@@ -2,6 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages  # для показа сообщений пользователю
 from django.core.exceptions import ValidationError
 from .models import Branch
+import re
 
 def branch_list(request):
     branches = Branch.objects.all().order_by('name')
@@ -24,15 +25,32 @@ def branch_create(request):
         errors = []
         if not name:
             errors.append("Название отделения обязательно для заполнения.")
+        elif len(name) < 3:
+            errors.append("Название отделения должно содержать минимум 3 символа")
+        
         if not address:
             errors.append("Адрес обязателен для заполнения.")
+        elif len(address) < 10:
+            errors.append("Адрес должен содержать минимум 10 символов")
+        
         if not phone:
-            errors.append("Телефон обязателен для заполнения.")
+            errors.append("Телефон обязателен для заполнения")
+        
         if not email:
             errors.append("Email обязателен для заполнения.")
+        else:
+            email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+            if not re.match(email_pattern, email):
+                errors.append("Введите корректный email адрес (например: office@mfc.ru)")
+        
         if not work_schedule:
-            errors.append("График работы обязателен для заполнения.")
-
+            errors.append("График работы обязателен для заполнения")
+        elif len(work_schedule) < 10:
+            errors.append("График работы должен содержать подробное описание")
+        
+        if email and Branch.objects.filter(email=email).exists():
+            errors.append("Отделение с таким email уже существует")
+        
         if errors:
             for error in errors:
                 messages.error(request, error)
@@ -81,14 +99,24 @@ def branch_edit(request, pk):
         errors = []
         if not name:
             errors.append("Название отделения обязательно для заполнения.")
+        elif len(name) < 3:
+            errors.append("Название отделения должно содержать минимум 3 символа")
+        
         if not address:
             errors.append("Адрес обязателен для заполнения.")
+        elif len(address) < 10:
+            errors.append("Адрес должен содержать минимум 10 символов")
+        
         if not phone:
-            errors.append("Телефон обязателен для заполнения.")
+            errors.append("Телефон обязателен для заполнения")
+        
         if not email:
             errors.append("Email обязателен для заполнения.")
+
         if not work_schedule:
-            errors.append("График работы обязателен для заполнения.")
+            errors.append("График работы обязателен для заполнения")
+        elif len(work_schedule) < 10:
+            errors.append("График работы должен содержать подробное описание")
         
         if errors:
             for error in errors:
