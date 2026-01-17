@@ -1,6 +1,5 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages  # для показа сообщений пользователю
-from django.core.exceptions import ValidationError
 from .models import Branch
 import re
 
@@ -11,7 +10,6 @@ def branch_list(request):
 def branch_detail(request, pk):
     branch = get_object_or_404(Branch, pk=pk) # пытаемся найти запись в базе
     return render(request, 'mfc/branch_detail.html', {'branch': branch})
-
 
 def branch_create(request):
     if request.method == 'POST':

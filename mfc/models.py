@@ -1,5 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
+from simple_history.models import HistoricalRecords
 
 class Branch(models.Model):
     name = models.CharField(
@@ -45,6 +46,8 @@ class Branch(models.Model):
         auto_now=True,
         verbose_name="Дата обновления"
     )
+
+    history = HistoricalRecords()
     
     class Meta:
         verbose_name = "Отделение"
@@ -108,6 +111,8 @@ class Service(models.Model):
         auto_now=True,
         verbose_name="Дата обновления"
     )
+
+    history = HistoricalRecords()
     
     class Meta:
         verbose_name = "Услуга"
@@ -352,6 +357,8 @@ class Appointment(models.Model):
         auto_now=True,
         verbose_name="Дата обновления"
     )
+
+    history = HistoricalRecords()
     
     class Meta:
         verbose_name = "Запись на прием"

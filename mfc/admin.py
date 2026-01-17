@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.utils import timezone
 from django.utils.timesince import timesince
+from simple_history.admin import SimpleHistoryAdmin
 
 from .models import Branch, Service, BranchService, UserProfile, Employee, Appointment
 
@@ -18,7 +19,7 @@ class ServiceBranchInline(admin.TabularInline):
     fields = ['branch', 'is_available', 'updated_at']
     readonly_fields = ['updated_at']
 
-class BranchAdmin(admin.ModelAdmin):
+class BranchAdmin(SimpleHistoryAdmin):
     list_display = ['id', 'name', 'phone', 'is_active', 'created_at', 'time_since_update']
     list_filter = ['is_active', 'updated_at']
     search_fields = ['name', 'address', 'phone', 'email']
@@ -45,7 +46,7 @@ class BranchAdmin(admin.ModelAdmin):
     list_display_links = ['id', 'name']
     ordering = ['-updated_at']
 
-class ServiceAdmin(admin.ModelAdmin):
+class ServiceAdmin(SimpleHistoryAdmin):
     list_display = ['id', 'name', 'category', 'duration_days', 'created_at', 'time_since_update']
     list_filter = ['category', 'updated_at']
     search_fields = ['name']
@@ -121,7 +122,7 @@ class EmployeeAdmin(admin.ModelAdmin):
     list_display_links = ['id', 'user_profile']
     ordering = ['updated_at']
 
-class AppointmentAdmin(admin.ModelAdmin):
+class AppointmentAdmin(SimpleHistoryAdmin):
     list_display = ['id', 'user_profile', 'service', 'branch', 'date', 'time', 'status', 'created_at', 'time_since_update']
     list_filter = ['status', 'branch', 'service', 'updated_at']
     search_fields = ['user_profile__full_name', 'date']
