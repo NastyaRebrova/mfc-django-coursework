@@ -51,6 +51,9 @@ class BranchAdmin(ExportMixin, SimpleHistoryAdmin):
     list_display_links = ['id', 'name']
     ordering = ['-updated_at']
 
+    def get_export_queryset(self, request):
+        return self.resource_class().get_export_queryset()
+
 class ServiceAdmin(ExportMixin, SimpleHistoryAdmin):
     resource_class = ServiceResource 
     export_formats = [XLSX, CSV]
@@ -76,6 +79,9 @@ class ServiceAdmin(ExportMixin, SimpleHistoryAdmin):
         return "—"
     list_display_links = ['id', 'name']
     ordering = ['name']
+
+    def get_export_queryset(self, request):
+        return self.resource_class().get_export_queryset()
 
 class UserProfileAdmin(admin.ModelAdmin):
     list_display = ['id', 'user', 'full_name', 'email', 'role', 'created_at', 'time_since_update']
