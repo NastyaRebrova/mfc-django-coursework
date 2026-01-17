@@ -1,7 +1,10 @@
 from django.contrib import admin
 from django.utils import timezone
 from django.utils.timesince import timesince
+from import_export.admin import ExportMixin 
+from .resources import BranchResource, ServiceResource 
 from simple_history.admin import SimpleHistoryAdmin
+from import_export.formats.base_formats import XLSX, CSV
 
 from .models import Branch, Service, BranchService, UserProfile, Employee, Appointment
 
@@ -19,7 +22,9 @@ class ServiceBranchInline(admin.TabularInline):
     fields = ['branch', 'is_available', 'updated_at']
     readonly_fields = ['updated_at']
 
-class BranchAdmin(SimpleHistoryAdmin):
+class BranchAdmin(ExportMixin, SimpleHistoryAdmin):
+    resource_class = BranchResource 
+    export_formats = [XLSX, CSV]
     list_display = ['id', 'name', 'phone', 'is_active', 'created_at', 'time_since_update']
     list_filter = ['is_active', 'updated_at']
     search_fields = ['name', 'address', 'phone', 'email']
@@ -46,7 +51,9 @@ class BranchAdmin(SimpleHistoryAdmin):
     list_display_links = ['id', 'name']
     ordering = ['-updated_at']
 
-class ServiceAdmin(SimpleHistoryAdmin):
+class ServiceAdmin(ExportMixin, SimpleHistoryAdmin):
+    resource_class = ServiceResource 
+    export_formats = [XLSX, CSV]
     list_display = ['id', 'name', 'category', 'duration_days', 'created_at', 'time_since_update']
     list_filter = ['category', 'updated_at']
     search_fields = ['name']
@@ -142,6 +149,7 @@ class AppointmentAdmin(SimpleHistoryAdmin):
         }),
     ]
     readonly_fields = ['created_at', 'updated_at']
+    date_hierarchy = 'date'
     @admin.display(description='Обновлено')
     def time_since_update(self, obj):
         if obj.updated_at:
