@@ -7,7 +7,8 @@ class BranchResource(resources.ModelResource):
     
     class Meta:
         model = Branch
-        fields = ('id', 'name', 'address', 'phone_formatted', 'email', 'work_schedule', 'is_active', 'created_at', 'updated_at')
+        fields = ('id', 'name', 'address', 'phone_formatted', 'email', 'work_schedule', 'is_active',
+                   'created_at', 'updated_at')
         export_order = fields
     
     def get_export_queryset(self):

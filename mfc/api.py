@@ -1,4 +1,4 @@
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, filters
 from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
@@ -10,7 +10,7 @@ from .serializers import BranchSerializer, ServiceSerializer
 class BranchViewSet(viewsets.ModelViewSet):
     queryset = Branch.objects.all().order_by('name')
     serializer_class = BranchSerializer
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['is_active']
     permission_classes = [AllowAny]
 
@@ -66,7 +66,7 @@ class BranchViewSet(viewsets.ModelViewSet):
 class ServiceViewSet(viewsets.ModelViewSet):
     queryset = Service.objects.all().order_by('name')
     serializer_class = ServiceSerializer
-    filter_backends = [DjangoFilterBackend]
+    filter_backends = [DjangoFilterBackend, filters.SearchFilter, filters.OrderingFilter]
     filterset_fields = ['category']
     permission_classes = [AllowAny]
     
