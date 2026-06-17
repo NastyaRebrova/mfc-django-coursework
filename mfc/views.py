@@ -184,70 +184,110 @@ def branch_delete(request, pk):
 @login_required
 def appointment_create(request, branch_pk):
     branch = get_object_or_404(Branch, pk=branch_pk)
+    if request.user.is_staff:
+        messages.error(
+            request, 
+            'Администраторы не могут записываться на услуги. Эта функция доступна только клиентам.'
+        )
+        return redirect('mfc:branch_detail', pk=branch.pk)
     if not branch.is_active:
-        messages.error(request, f'Отделение "{branch.name}" в настоящее время неактивно. Запись невозможна.')
+        messages.error(
+            request, 
+            f'Отделение "{branch.name}" в настоящее время неактивно. Запись невозможна.'
+        )
         return redirect('mfc:branch_detail', pk=branch.pk)
     available_services = BranchService.objects.filter(
-        branch=branch,
-        is_available=True
-    ).select_related('service')
+        branch=branch,           
+        is_available=True        
+    ).select_related('service') 
+    
     if request.method == 'POST':
         service_id = request.POST.get('service')
-        date_str = request.POST.get('date')
+        date_str = request.POST.get('date')       
         time_str = request.POST.get('time')
         
         errors = []
-
-        # проверяем, что все поля заполнены
-        if not service_id:
-            errors.append("Выберите услугу")
-        if not date_str:
-            errors.append("Укажите дату")
-        if not time_str:
-            errors.append("Укажите время")
         
-        # проверяем, что дата не в прошлом
+        if not service_id:
+            errors.append("Выберите услугу из списка")
+        
+        if not date_str:
+            errors.append("Укажите дату приема")
+        
+        if not time_str:
+            errors.append("Укажите время приема")
+        
         if date_str:
             try:
+                # преобразуем строку в объект date
                 selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
                 if selected_date < timezone.now().date():
-                    errors.append("Дата не может быть в прошлом")
+                    errors.append("Дата не может быть в прошлом. Выберите сегодняшнюю или будущую дату.")
+                    
             except ValueError:
-                errors.append("Неверный формат даты")
-
-        if not errors:
-            try:
-                service = get_object_or_404(Service, pk=service_id)
-                appointment = Appointment.objects.create(
-                    user_profile=request.user.userprofile,  
-                    service=service,
-                    branch=branch,
-                    date=date_str,
-                    time=time_str,
-                    status=Appointment.Status.PENDING
-                )
-                messages.success(request, f'Вы успешно записаны на услугу "{service.name}" в {branch.name} на {date_str} {time_str}!')
-                return redirect('mfc:branch_detail', pk=branch.pk)
-                
-            except Exception as e:
-                messages.error(request, f'Произошла ошибка при записи: {str(e)}')
-                return render(request, 'mfc/appointment_form.html', {
-                    'branch': branch,
-                    'available_services': available_services,
-                })
-            
-        for error in errors:
-            messages.error(request, error)
+                errors.append("Неверный формат даты. Используйте формат ГГГГ-ММ-ДД.")
         
-        return render(request, 'mfc/appointment_form.html', {
-            'branch': branch,
-            'available_services': available_services,
-            'selected_service': service_id,
-            'selected_date': date_str,
-            'selected_time': time_str,
-        })
+        if time_str:
+            try:
+                selected_time = datetime.strptime(time_str, '%H:%M').time()
+                hour = selected_time.hour
+                minute = selected_time.minute
+                if hour < 9 or (hour == 18 and minute > 0) or hour > 18:
+                    errors.append(
+                        "Время приема должно быть в рабочее время (с 9:00 до 18:00). "
+                        "Пожалуйста, выберите время в этом диапазоне."
+                    )
+                    
+            except ValueError:
+                errors.append("Неверный формат времени. Используйте формат ЧЧ:ММ.")
+        
+        if errors:
+            # перебираем все ошибки и добавляем их как сообщения
+            for error in errors:
+                messages.error(request, error)
+            return render(request, 'mfc/appointment_form.html', {
+                'branch': branch,
+                'available_services': available_services,
+                'selected_service': service_id,     
+                'selected_date': date_str,          
+                'selected_time': time_str,           
+            })
+        
+        try:
+            service = get_object_or_404(Service, pk=service_id)
+            appointment = Appointment.objects.create(
+                user_profile=request.user.userprofile, 
+                service=service,                        
+                branch=branch,                        
+                date=date_str,                      
+                time=time_str,                         
+                status=Appointment.Status.PENDING       
+            )
+            
+            # показываем пользователю сообщение об успехе
+            messages.success(
+                request, 
+                f'Вы успешно записаны на услугу "{service.name}" '
+                f'в отделении "{branch.name}" на {date_str} в {time_str}!'
+            )
+            
+            return redirect('mfc:branch_detail', pk=branch.pk)
+            
+        except Exception as e:
+            messages.error(
+                request, 
+                f'Произошла непредвиденная ошибка при записи: {str(e)}. '
+                'Пожалуйста, попробуйте еще раз или обратитесь к администратору.'
+            )
+            
+            return render(request, 'mfc/appointment_form.html', {
+                'branch': branch,
+                'available_services': available_services,
+                'selected_service': service_id,
+                'selected_date': date_str,
+                'selected_time': time_str,
+            })
     
-    # GET запрос — просто показываем форму
     return render(request, 'mfc/appointment_form.html', {
         'branch': branch,
         'available_services': available_services,
