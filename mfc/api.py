@@ -3,16 +3,28 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.permissions import AllowAny
 from django_filters.rest_framework import DjangoFilterBackend
-from django.db.models import Q
+from django.db.models import Q, Count
 from .models import Branch, Service
 from .serializers import BranchSerializer, ServiceSerializer
 
 class BranchViewSet(viewsets.ModelViewSet):
-    queryset = Branch.objects.all().order_by('name')
+    queryset = Branch.objects.all().annotate(
+        active_services_count=Count(
+            'branch_services',
+            filter=Q(branch_services__is_available=True),
+            distinct=True
+        )
+    ).order_by('name')
     serializer_class = BranchSerializer
     filter_backends = [DjangoFilterBackend, filters.OrderingFilter]
     filterset_fields = ['is_active']
     permission_classes = [AllowAny]
+
+    def get_serializer_context(self):
+        context = super().get_serializer_context()
+        context['request'] = self.request
+        context['include_services'] = True
+        return context
 
     @action(detail=False, methods=['GET']) # получить только активные отделения
     def active(self, request):

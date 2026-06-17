@@ -27,14 +27,18 @@ class BranchSerializer(serializers.ModelSerializer):
         }
     )
 
+    active_services_count = serializers.IntegerField(read_only=True)
+
     photo_url = serializers.SerializerMethodField(read_only=True)
+    services_count = serializers.SerializerMethodField(read_only=True)
 
     class Meta:
         model = Branch
         fields = [
             'id', 'name', 'address', 'phone', 'email', 
             'photo', 'photo_url', 'work_schedule', 'is_active',
-            'created_at', 'updated_at'
+            'created_at', 'updated_at',
+            'services_count', 'active_services_count'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at', 'photo_url']
 
@@ -42,6 +46,14 @@ class BranchSerializer(serializers.ModelSerializer):
         if obj.photo:
             return obj.photo.url
         return None
+    
+    def get_services_count(self, obj):
+        context = self.context
+        include_services = context.get('include_services', True)
+        # если в контексте сказано не показывать услуги
+        if not include_services:
+            return None
+        return obj.branch_services.count()
     
     def validate_work_schedule(self, value):
         if len(value) < 10:
@@ -84,13 +96,30 @@ class ServiceSerializer(serializers.ModelSerializer):
         }
     )
 
+    # оценка срока выполнения
+    duration_assessment = serializers.SerializerMethodField(read_only=True)
+    # количество отделений, где доступна услуга
+    branches_count = serializers.SerializerMethodField(read_only=True)
+
     class Meta:
         model = Service
         fields = [
             'id', 'name', 'category', 'duration_days',
-            'created_at', 'updated_at'
+            'created_at', 'updated_at',
+            'duration_assessment', 'branches_count'
         ]
         read_only_fields = ['id', 'created_at', 'updated_at']
+
+    def get_duration_assessment(self, obj):
+        if obj.duration_days <= 3:
+            return "Быстро"
+        elif obj.duration_days <= 7:
+            return "Средне"
+        else:
+            return "Долго"
+        
+    def get_branches_count(self, obj):
+        return obj.branch_services.filter(is_available=True).count()
 
     def validate_name(self, value):
         instance = self.instance

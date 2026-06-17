@@ -9,69 +9,80 @@
     
     {% if branches %}
         <p>Найдено отделений: {{ branches|length }}</p>
-        <table>
-            <thead>
-                <tr>
-                    <th>Фото</th>
-                    <th>ID</th>
-                    <th>Название</th>
-                    <th>Адрес</th>
-                    <th>Телефон</th>
-                    <th>Статус</th>
-                    <th>Действия</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for branch in branches %}
-                <tr>
-                    <td style="text-align: center; vertical-align: middle;">
-                        {% if branch.photo %}
-                            <img src="{{ branch.photo.url }}" 
-                                 alt="{{ branch.name }}" 
-                                 style="width: 100px; height: 80px; object-fit: cover; border-radius: 3px;">
-                        {% else %}
-                            <div style="width: 100px; height: 80px; background-color: #e9ecef; 
-                                        display: flex; align-items: center; justify-content: center;
-                                        border-radius: 3px; margin: 0 auto;">
-                                <span style="color: #6c757d; font-size: 12px;">Нет фото</span>
-                            </div>
-                        {% endif %}
-                    </td>
-                    <td>{{ branch.id }}</td>
-                    <td>
-                        <div class="name_container">
-                            <strong>{{ branch.name }}</strong>
-                            <small style="color: #666;">{{ branch.email }}</small>
-                        </div>
-                    </td>
-                    <td>{{ branch.address|truncatechars:30 }}</td>
-                    <td>{{ branch.phone }}</td>
-                    <td>
-                        {% if branch.is_active %}
-                            <span style="color: green; font-weight: bold;">Активно</span>
-                        {% else %}
-                            <span style="color: red;">Неактивно</span>
-                        {% endif %}
-                    </td>
-                    <td>
-                        <div class="button-container">
-                            <a href="{% url 'mfc:branch_detail' branch.pk %}" class="btn">
-                                Просмотр
-                            </a>
-                            {% if user.is_authenticated and user.is_staff %}
-                                <a href="{% url 'mfc:branch_edit' branch.pk %}" class="btn btn-warning">
-                                    Редактировать
-                                </a>
-                                <a href="{% url 'mfc:branch_delete' branch.pk %}" class="btn btn-danger">
-                                    Удалить
-                                </a>
+        <div style="overflow-x: auto;">
+            <table style="min-width: 1000px; font-size: 13px;">
+                <thead>
+                    <tr>
+                        <th style="width: 80px;">Фото</th>
+                        <th style="width: 40px;">ID</th>
+                        <th style="min-width: 150px;">Название</th>
+                        <th style="min-width: 120px;">Адрес</th>
+                        <th style="width: 110px;">Телефон</th>
+                        <th style="width: 70px;">Статус</th>
+                        <th style="width: 50px;">Услуг</th>
+                        <th style="width: 90px;">Ср. срок (дн)</th>
+                        <th style="min-width: 100px;">Действия</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for branch in branches %}
+                    <tr>
+                        <td style="text-align: center; vertical-align: middle;">
+                            {% if branch.photo %}
+                                <img src="{{ branch.photo.url }}" 
+                                     alt="{{ branch.name }}" 
+                                     style="width: 80px; height: 65px; object-fit: cover; border-radius: 3px;">
+                            {% else %}
+                                <div style="width: 80px; height: 65px; background-color: #e9ecef; 
+                                            display: flex; align-items: center; justify-content: center;
+                                            border-radius: 3px; margin: 0 auto;">
+                                    <span style="color: #6c757d; font-size: 10px;">Нет фото</span>
+                                </div>
                             {% endif %}
-                        </div>
-                    </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                        </td>
+                        <td style="text-align: center;">{{ branch.id }}</td>
+                        <td>
+                            <div class="name_container">
+                                <strong>{{ branch.name|truncatechars:25 }}</strong>
+                                <small style="color: #666; font-size: 11px;">{{ branch.email|truncatechars:20 }}</small>
+                            </div>
+                        </td>
+                        <td>{{ branch.address|truncatechars:20 }}</td>
+                        <td style="font-size: 12px;">{{ branch.phone }}</td>
+                        <td style="text-align: center; font-size: 12px;">
+                            {% if branch.is_active %}
+                                <span style="color: green; font-weight: bold;">Активно</span>
+                            {% else %}
+                                <span style="color: red;">Неактивно</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align: center; font-weight: bold;">
+                            {{ branch.services_count|default:"0" }} 
+                        </td>
+                        </td>
+                        <td style="text-align: center; font-size: 12px;">
+                            {{ branch.avg_duration_days|floatformat:0|default:"-" }}
+                        </td>
+                        <td>
+                            <div class="button-container" style="gap: 2px;">
+                                <a href="{% url 'mfc:branch_detail' branch.pk %}" class="btn" style="font-size: 11px; padding: 3px 8px;">
+                                    Просмотр
+                                </a>
+                                {% if user.is_authenticated and user.is_staff %}
+                                    <a href="{% url 'mfc:branch_edit' branch.pk %}" class="btn btn-warning" style="font-size: 11px; padding: 3px 8px;">
+                                        Редактировать
+                                    </a>
+                                    <a href="{% url 'mfc:branch_delete' branch.pk %}" class="btn btn-danger" style="font-size: 11px; padding: 3px 8px;">
+                                        Удалить
+                                    </a>
+                                {% endif %}
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
     {% else %}
         <div class="card" style="text-align: center; padding: 40px;">
             <h3>Нет отделений</h3>

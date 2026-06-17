@@ -6,9 +6,18 @@ from .models import Branch, Service, BranchService, Appointment
 from datetime import datetime
 import re
 from django.contrib.admin.views.decorators import staff_member_required
+from django.db.models import Count, Avg
+from math import ceil
 
 def branch_list(request):
-    branches = Branch.objects.all().order_by('name')
+    branches = Branch.objects.all().order_by('name').annotate(
+        services_count=Count('branch_services', distinct=True),   
+        avg_duration_days=Avg('services__duration_days'), 
+    )
+    for branch in branches:
+        if branch.avg_duration_days:
+            branch.avg_duration_days = ceil(branch.avg_duration_days)
+    
     return render(request, 'mfc/branch_list.html', {'branches': branches})
 
 def branch_detail(request, pk):
