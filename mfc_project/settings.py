@@ -42,10 +42,12 @@ INSTALLED_APPS = [
     'django_filters',
     'simple_history',
     'import_export',
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -152,3 +154,11 @@ REST_FRAMEWORK = {
 LOGIN_URL = '/accounts/login/'  # куда перенаправлять неавторизованных пользователей
 LOGIN_REDIRECT_URL = '/'        # куда перенаправлять после успешного входа
 LOGOUT_REDIRECT_URL = '/' 
+
+INTERNAL_IPS = [
+    '127.0.0.1',
+]
+
+DEBUG_TOOLBAR_CONFIG = {
+    'SHOW_TOOLBAR_CALLBACK': lambda request: True,
+}

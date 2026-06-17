@@ -32,7 +32,25 @@
                     {{ branch.updated_at|date:"d.m.Y H:i" }}
                 </p>
             </div>
-            
+                        <div class="card">
+                <h3>Услуги в этом отделении</h3>
+                {% if services %}
+                    <ul>
+                        {% for bs in services %}
+                            <li>
+                                {{ bs.service.name }} 
+                                {% if bs.is_available %}
+                                    <span style="color: green;">Доступна</span>
+                                {% else %}
+                                    <span style="color: red;">Недоступна</span>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>В этом отделении пока нет услуг</p>
+                {% endif %}
+            </div>
         </div>
         
         <div>

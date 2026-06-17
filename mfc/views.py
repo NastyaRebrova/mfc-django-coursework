@@ -12,9 +12,14 @@ def branch_list(request):
     return render(request, 'mfc/branch_list.html', {'branches': branches})
 
 def branch_detail(request, pk):
-    branch = get_object_or_404(Branch, pk=pk) # пытаемся найти запись в базе
-    return render(request, 'mfc/branch_detail.html', {'branch': branch})
-
+    branch = get_object_or_404(Branch, pk=pk)
+    services = BranchService.objects.filter(
+        branch=branch
+    ).select_related('service')
+    return render(request, 'mfc/branch_detail.html', {
+        'branch': branch,
+        'services': services,
+    })
 @staff_member_required
 def branch_create(request):
     if request.method == 'POST':
