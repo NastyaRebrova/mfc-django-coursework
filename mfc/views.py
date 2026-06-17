@@ -1,7 +1,11 @@
 from django.shortcuts import render, get_object_or_404, redirect
-from django.contrib import messages  # для показа сообщений пользователю
-from .models import Branch
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.utils import timezone
+from .models import Branch, Service, BranchService, Appointment
+from datetime import datetime
 import re
+from django.contrib.admin.views.decorators import staff_member_required
 
 def branch_list(request):
     branches = Branch.objects.all().order_by('name')
@@ -11,6 +15,7 @@ def branch_detail(request, pk):
     branch = get_object_or_404(Branch, pk=pk) # пытаемся найти запись в базе
     return render(request, 'mfc/branch_detail.html', {'branch': branch})
 
+@staff_member_required
 def branch_create(request):
     if request.method == 'POST':
         name = request.POST.get('name', '').strip()
@@ -81,7 +86,7 @@ def branch_create(request):
     else: # GET запрос
         return render(request, 'mfc/branch_form.html', {'form_type': 'create'})
 
-
+@staff_member_required
 def branch_edit(request, pk):
     branch = get_object_or_404(Branch, pk=pk)
     if request.method == 'POST':
@@ -155,6 +160,7 @@ def branch_edit(request, pk):
             'form_type': 'edit'
         })
 
+@staff_member_required
 def branch_delete(request, pk):
     branch = get_object_or_404(Branch, pk=pk)
     if request.method == 'POST':
@@ -174,3 +180,75 @@ def branch_delete(request, pk):
     
     else:
         return render(request, 'mfc/branch_confirm_delete.html', {'branch': branch})
+
+@login_required
+def appointment_create(request, branch_pk):
+    branch = get_object_or_404(Branch, pk=branch_pk)
+    if not branch.is_active:
+        messages.error(request, f'Отделение "{branch.name}" в настоящее время неактивно. Запись невозможна.')
+        return redirect('mfc:branch_detail', pk=branch.pk)
+    available_services = BranchService.objects.filter(
+        branch=branch,
+        is_available=True
+    ).select_related('service')
+    if request.method == 'POST':
+        service_id = request.POST.get('service')
+        date_str = request.POST.get('date')
+        time_str = request.POST.get('time')
+        
+        errors = []
+
+        # проверяем, что все поля заполнены
+        if not service_id:
+            errors.append("Выберите услугу")
+        if not date_str:
+            errors.append("Укажите дату")
+        if not time_str:
+            errors.append("Укажите время")
+        
+        # проверяем, что дата не в прошлом
+        if date_str:
+            try:
+                selected_date = datetime.strptime(date_str, '%Y-%m-%d').date()
+                if selected_date < timezone.now().date():
+                    errors.append("Дата не может быть в прошлом")
+            except ValueError:
+                errors.append("Неверный формат даты")
+
+        if not errors:
+            try:
+                service = get_object_or_404(Service, pk=service_id)
+                appointment = Appointment.objects.create(
+                    user_profile=request.user.userprofile,  
+                    service=service,
+                    branch=branch,
+                    date=date_str,
+                    time=time_str,
+                    status=Appointment.Status.PENDING
+                )
+                messages.success(request, f'Вы успешно записаны на услугу "{service.name}" в {branch.name} на {date_str} {time_str}!')
+                return redirect('mfc:branch_detail', pk=branch.pk)
+                
+            except Exception as e:
+                messages.error(request, f'Произошла ошибка при записи: {str(e)}')
+                return render(request, 'mfc/appointment_form.html', {
+                    'branch': branch,
+                    'available_services': available_services,
+                })
+            
+        for error in errors:
+            messages.error(request, error)
+        
+        return render(request, 'mfc/appointment_form.html', {
+            'branch': branch,
+            'available_services': available_services,
+            'selected_service': service_id,
+            'selected_date': date_str,
+            'selected_time': time_str,
+        })
+    
+    # GET запрос — просто показываем форму
+    return render(request, 'mfc/appointment_form.html', {
+        'branch': branch,
+        'available_services': available_services,
+    })

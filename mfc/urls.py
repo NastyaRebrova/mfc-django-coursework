@@ -23,6 +23,9 @@ urlpatterns = [
     # удаление отделения
     path('branches/<int:pk>/delete/', views.branch_delete, name='branch_delete'),
 
+    # запись на услугу в отделении
+    path('branches/<int:branch_pk>/appointment/', views.appointment_create, name='appointment_create'),
+
     path('api/', include(router.urls)),
 ]
 

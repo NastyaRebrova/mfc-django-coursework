@@ -237,8 +237,25 @@
         <div class="container">
             <ul>
                 <li><a href="{% url 'mfc:branch_list' %}">Отделения</a></li>
-                <li><a href="{% url 'mfc:branch_create' %}">Добавить отделение</a></li>
-                <li><a href="/admin/" target="_blank">Админка</a></li>
+                {% if user.is_authenticated and user.is_staff %}
+                    <li><a href="{% url 'mfc:branch_create' %}">Добавить отделение</a></li>
+                {% endif %}
+                {% if user.is_authenticated and user.is_staff %}
+                    <li><a href="/admin/" target="_blank">Админка</a></li>
+                {% endif %}
+                <li style="margin-left: auto;">
+                    {% if user.is_authenticated %}
+                        <span style="color: white; margin-right: 10px;">{{ user.username }}</span>
+                        <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" style="background: none; border: none; color: #ffcccc; cursor: pointer; padding: 5px 15px; text-decoration: underline;">
+                                Выйти
+                            </button>
+                        </form>
+                    {% else %}
+                        <a href="{% url 'login' %}">Войти</a>
+                    {% endif %}
+                </li>
             </ul>
         </div>
     </nav>

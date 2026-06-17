@@ -148,3 +148,7 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.AllowAny', 
     ],
 }
+
+LOGIN_URL = '/accounts/login/'  # куда перенаправлять неавторизованных пользователей
+LOGIN_REDIRECT_URL = '/'        # куда перенаправлять после успешного входа
+LOGOUT_REDIRECT_URL = '/' 

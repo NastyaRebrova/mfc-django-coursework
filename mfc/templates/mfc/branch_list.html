@@ -58,12 +58,14 @@
                             <a href="{% url 'mfc:branch_detail' branch.pk %}" class="btn">
                                 Просмотр
                             </a>
-                            <a href="{% url 'mfc:branch_edit' branch.pk %}" class="btn btn-warning">
-                                Редактировать
-                            </a>
-                            <a href="{% url 'mfc:branch_delete' branch.pk %}" class="btn btn-danger">
-                                Удалить
-                            </a>
+                            {% if user.is_authenticated and user.is_staff %}
+                                <a href="{% url 'mfc:branch_edit' branch.pk %}" class="btn btn-warning">
+                                    Редактировать
+                                </a>
+                                <a href="{% url 'mfc:branch_delete' branch.pk %}" class="btn btn-danger">
+                                    Удалить
+                                </a>
+                            {% endif %}
                         </div>
                     </td>
                 </tr>
@@ -74,17 +76,15 @@
         <div class="card" style="text-align: center; padding: 40px;">
             <h3>Нет отделений</h3>
             <p>В базе данных отсутствуют отделения МФЦ.</p>
-            <p>Добавьте первое отделение:</p>
-            <a href="{% url 'mfc:branch_create' %}" class="btn btn-success">
-                Добавить первое отделение
-            </a>
         </div>
     {% endif %}
     
-    <div style="margin-top: 30px; text-align: center;">
-        <a href="{% url 'mfc:branch_create' %}" class="btn btn-success">
-            + Добавить новое отделение
-        </a>
-    </div>
+    {% if user.is_authenticated and user.is_staff %}
+        <div style="margin-top: 30px; text-align: center;">
+            <a href="{% url 'mfc:branch_create' %}" class="btn btn-success">
+                + Добавить новое отделение
+            </a>
+        </div>
+    {% endif %}
 </section>
 {% endblock %}

@@ -58,12 +58,19 @@
     </div>
     
     <div style="margin-top: 20px; display: flex; gap: 10px;">
-        <a href="{% url 'mfc:branch_edit' branch.pk %}" class="btn btn-warning">
-            Редактировать отделение
-        </a>
-        <a href="{% url 'mfc:branch_delete' branch.pk %}" class="btn btn-danger">
-            Удалить отделение
-        </a>
+        {% if user.is_authenticated and user.is_staff %}
+            <a href="{% url 'mfc:branch_edit' branch.pk %}" class="btn btn-warning">
+                Редактировать отделение
+            </a>
+            <a href="{% url 'mfc:branch_delete' branch.pk %}" class="btn btn-danger">
+                Удалить отделение
+            </a>
+        {% endif %}
+        {% if user.is_authenticated and not user.is_staff %}
+            <a href="{% url 'mfc:appointment_create' branch.pk %}" class="btn btn-success" style="margin-left: auto;">
+                Записаться на услугу
+            </a>
+        {% endif %}
         <a href="{% url 'mfc:branch_list' %}" class="btn">
             Вернуться к списку
         </a>
